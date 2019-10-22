@@ -1,15 +1,9 @@
-/*
-     Q0470
-     AUTOR:   BrincandoComIdeias
-     LINK:    https://www.youtube.com/brincandocomideias ; https://cursodearduino.net/
-     COMPRE:  https://www.arducore.com.br/
-     SKETCH:  PWM I2C
-     DATA:    04/06/2019
-*/
-
 // INCLUSÃO DE BIBLIOTECAS
+#include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <Ultrasonic.h>
+
 #define PERNA_H_DIREITA 0
 #define PERNA_V_DIREITA 1
 #define PE_V_DIREITA 2
@@ -21,7 +15,11 @@
 
 
 // INSTANCIANDO OBJETOS
+const int echoPin = 12;
+const int trigPin = 13;
+int distancia;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+Ultrasonic ultrasonic(trigPin,echoPin);
 
 // DECLARAÇÃO DE FUNÇÕES
 void writeServos(int posicao, int tempo);
@@ -33,137 +31,147 @@ void levantarPernaDireita();
 void levantarPernaEsquerda();
 void abaixarPernaDireita();
 void abaixarPernaEsquerda();
+void andar();
+void verificarProximidade();
+
 void setup() {
   Serial.begin(9600);
   beginServos(); // INCIA OS SERVOS
   delay(300);
   centralizarServos();
+  pinMode(8,OUTPUT);
+  digitalWrite(8,HIGH);
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
 }
 
 void loop() {
 int comando = 0;
- while(Serial.available()){
+while(Serial.available()){
   comando = Serial.read();
   switch(comando){
-
     case '1':
-    tiltPernaDireita();
-    break;
-    
-    case '2':
-    levantarPernaDireita();
-    break;
-
-    case '3':
-    abaixarPernaDireita();
-    break;
-    
-    case '4':
-    tiltPernaEsquerda();
-    break;
-
-    case '5':
-    levantarPernaEsquerda();
-    break;
-    
-    case '6':
-    abaixarPernaEsquerda();
+    andar();
     break;
     case '7':
     centralizarServos();
-    break;
   }
  }
-}
 
+}
+void verificarProximidade(){
+  digitalWrite(trigPin, LOW); //SETA O PINO 6 COM UM PULSO BAIXO "LOW"
+  delayMicroseconds(2); // DELAY DE 2 MICROSSEGUNDOS
+  digitalWrite(trigPin, HIGH); //SETA O PINO 6 COM PULSO ALTO "HIGH"
+  delayMicroseconds(10); // DELAY DE 10 MICROSSEGUNDOS
+  digitalWrite(trigPin, LOW); //SETA O PINO 6 COM PULSO BAIXO "LOW" NOVAMENTE
+  // FUNÇÃO RANGING, FAZ A CONVERSÃO DO TEMPO DE
+  //RESPOSTA DO ECHO EM CENTÍMETROS E ARMAZENA
+  //NA VARIÁVEL "distancia"
+  distancia = (ultrasonic.Ranging(CM)); // VARIÁVEL GLOBAL RECEBE O VALOR DA DISTÂNCIA MEDIDA
+  delay(500); //INTERVALO DE 500 MILISSEGUNDOS
+}
 void tiltPernaDireita(){
-  for(int i = 90; i< 160;i++){
-    writeServos(PE_H_ESQUERDA,i);
-    delay(10);
-  } 
-  for(int i = 90; i> 60;i--){
+    for(int i = 90; i> 70;i--){
     writeServos(PERNA_H_ESQUERDA,i);
     writeServos(PERNA_H_DIREITA,i);
-    delay(5);
+    delay(10);
   }
+  for(int i = 90; i< 150;i++){
+    writeServos(PE_H_ESQUERDA,i);
+    writeServos(PE_H_DIREITA,i);
+    delay(10);
+  } 
+
     for(int i = 90; i< 130;i++){
     writeServos(PE_V_ESQUERDA,i);
-    writeServos(PE_V_ESQUERDA,i);
     delay(5);
   }
-  writeServos(PE_H_DIREITA,160);
   delay(150);
 }
 void levantarPernaDireita(){
-  for(int i = 90; i< 160;i++){
+  for(int i = 90; i< 150;i++){
     writeServos(PERNA_V_DIREITA,i);
-    delay(5);
+    writeServos(PE_V_DIREITA,i);
+    delay(10);
   }
-  writeServos(PE_V_DIREITA,130);
+  ;
   delay(150);
 }
 void abaixarPernaDireita(){
-  for(int i = 160; i> 100;i--){
-    writeServos(PE_H_ESQUERDA,i);
-    delay(5);
+  for(int i = 70; i< 90;i++){
+    writeServos(PERNA_H_ESQUERDA,i);
+    writeServos(PERNA_H_DIREITA,i);
+    delay(10);
   }
-  for(int i = 130; i> 90;i--){
-    writeServos(PERNA_V_DIREITA,i);
+  for(int i = 160; i> 90;i--){
+    writeServos(PE_H_DIREITA,i);
+    writeServos(PE_H_ESQUERDA,i);
+    writeServos(PE_V_DIREITA,i);
+    delay(10);
+  }
+}
+void tiltPernaEsquerda(){
+
+  for(int i = 90; i< 150;i++){
+    writeServos(PERNA_H_ESQUERDA,i);
+    writeServos(PERNA_H_DIREITA,i);
+    delay(10);
+  }
+  for(int i = 90; i> 40;i--){
+  writeServos(PE_H_ESQUERDA,i);
+  writeServos(PE_H_DIREITA,i);
+  delay(10);
+  }
+  for(int i = 90; i< 50;i++){
     writeServos(PE_V_DIREITA,i);
     delay(5);
   }
-  for(int i = 120; i> 90;i--){
-    writeServos(PE_V_ESQUERDA,i);
-    writeServos(PE_V_ESQUERDA,i);
-    delay(2);
-  }
-  delay(150);
-  writeServos(PE_H_DIREITA,90);
-  writeServos(PERNA_H_DIREITA,90);
-  writeServos(PERNA_H_ESQUERDA,90);
-  delay(150);
-}
-void tiltPernaEsquerda(){
-  for(int i = 90; i< 130;i++){
-    writeServos(PERNA_H_ESQUERDA,i);
-    writeServos(PERNA_H_DIREITA,i);
-    delay(5);
-  }
-  for(int i = 90; i> 50;i--){
-  writeServos(PE_H_ESQUERDA,i);
-  writeServos(PE_H_DIREITA,i);
-  }
-  delay(150);
 }
 void levantarPernaEsquerda(){
-  for(int i = 50; i< 80;i++){
-    writeServos(PE_H_DIREITA,i);
-    writeServos(PE_H_ESQUERDA,i);
-    delay(5);
-    
+    for(int i = 150; i> 90;i--){
+    writeServos(PERNA_V_DIREITA,i);
+    delay(10);
   }
-  for(int i = 90; i> 40;i--){
+  for(int i = 90; i> 50;i--){
     writeServos(PERNA_V_ESQUERDA,i);
     writeServos(PE_V_ESQUERDA,i);
-    delay(5);
+    delay(10);
   }
-    delay(150);
+
 }
-void abaixarPernaEsquerda(){
+void abaixarPernaEsquerda(){    
+  for(int i = 40; i< 90;i++){
+    writeServos(PE_H_ESQUERDA,i);
+    writeServos(PE_H_DIREITA,i);
+    delay(10);
+  }
+
   for(int i = 50; i< 90;i++){
     writeServos(PERNA_V_ESQUERDA,i);
     writeServos(PE_V_ESQUERDA,i);
-    delay(5);
+    delay(10);
   }
-  for(int i = 80; i< 90;i++){
-    writeServos(PE_H_DIREITA,i);
-    delay(5);
+    for(int i = 150; i> 90;i--){
+    writeServos(PERNA_H_ESQUERDA,i);
+    writeServos(PERNA_H_DIREITA,i);
+    delay(10);
   }
-  writeServos(PE_H_ESQUERDA,90);
-  writeServos(PERNA_H_DIREITA,90);
-  writeServos(PERNA_H_ESQUERDA,90);
   delay(150);
-  //centralizarServos();
+}
+void andar(){
+  verificarProximidade();
+  Serial.println(distancia);
+  while(distancia > 20){
+    tiltPernaDireita();
+    levantarPernaDireita();
+    abaixarPernaDireita();
+    tiltPernaEsquerda();
+    levantarPernaEsquerda();
+    abaixarPernaEsquerda();
+    verificarProximidade();
+    Serial.println(distancia);
+  }
 }
 void writeServos(int nServo, int posicao) {
 #define SERVOMIN  71  // VALOR PARA UM PULSO MAIOR QUE 1 mS
