@@ -97,16 +97,13 @@ void tiltPernaDireita(){
     writeServos(PE_V_ESQUERDA,i);
     delay(10);
   }
-  delay(150);
 }
 void levantarPernaDireita(){
-  for(int i = 90; i< 170;i++){
+  for(int i = 90; i< 150;i++){
     writeServos(PERNA_V_DIREITA,i);
     writeServos(PE_V_DIREITA,i);
     delay(10);
   }
-  ;
-  delay(150);
 }
 void abaixarPernaDireita(){
   for(int i = 70; i< 90;i++){
@@ -139,7 +136,7 @@ void tiltPernaEsquerda(){
   }
 }
 void levantarPernaEsquerda(){
-    for(int i = 170; i> 90;i--){
+    for(int i = 150; i> 90;i--){
     writeServos(PERNA_V_DIREITA,i);
     delay(10);
   }
@@ -167,7 +164,6 @@ void abaixarPernaEsquerda(){
     writeServos(PERNA_H_DIREITA,i);
     delay(10);
   }
-  delay(150);
 }
 void andar(){
   tiltPernaDireita();
