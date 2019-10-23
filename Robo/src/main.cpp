@@ -17,7 +17,7 @@
 // INSTANCIANDO OBJETOS
 const int echoPin = 12;
 const int trigPin = 13;
-int distancia;
+int distancia = 21;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 Ultrasonic ultrasonic(trigPin,echoPin);
 
@@ -41,23 +41,33 @@ void setup() {
   centralizarServos();
   pinMode(8,OUTPUT);
   digitalWrite(8,HIGH);
+  pinMode(11,OUTPUT);
+  digitalWrite(11,HIGH);
   pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
 }
 
 void loop() {
-int comando = 0;
+/*char comando;
 while(Serial.available()){
   comando = Serial.read();
+  Serial.println(comando);
   switch(comando){
-    case '1':
+    case 'f':*/
+    while(distancia > 20){
     andar();
+    verificarProximidade();
+    Serial.println(distancia);
+    }/*
     break;
-    case '7':
+    case 'c':
     centralizarServos();
+    break;
+    case 'x':
+    break;
   }
  }
-
+*/
 }
 void verificarProximidade(){
   digitalWrite(trigPin, LOW); //SETA O PINO 6 COM UM PULSO BAIXO "LOW"
@@ -85,12 +95,12 @@ void tiltPernaDireita(){
 
     for(int i = 90; i< 130;i++){
     writeServos(PE_V_ESQUERDA,i);
-    delay(5);
+    delay(10);
   }
   delay(150);
 }
 void levantarPernaDireita(){
-  for(int i = 90; i< 150;i++){
+  for(int i = 90; i< 170;i++){
     writeServos(PERNA_V_DIREITA,i);
     writeServos(PE_V_DIREITA,i);
     delay(10);
@@ -125,11 +135,11 @@ void tiltPernaEsquerda(){
   }
   for(int i = 90; i< 50;i++){
     writeServos(PE_V_DIREITA,i);
-    delay(5);
+    delay(10);
   }
 }
 void levantarPernaEsquerda(){
-    for(int i = 150; i> 90;i--){
+    for(int i = 170; i> 90;i--){
     writeServos(PERNA_V_DIREITA,i);
     delay(10);
   }
@@ -160,18 +170,12 @@ void abaixarPernaEsquerda(){
   delay(150);
 }
 void andar(){
-  verificarProximidade();
-  Serial.println(distancia);
-  while(distancia > 20){
-    tiltPernaDireita();
-    levantarPernaDireita();
-    abaixarPernaDireita();
-    tiltPernaEsquerda();
-    levantarPernaEsquerda();
-    abaixarPernaEsquerda();
-    verificarProximidade();
-    Serial.println(distancia);
-  }
+  tiltPernaDireita();
+  levantarPernaDireita();
+  abaixarPernaDireita();
+  tiltPernaEsquerda();
+  levantarPernaEsquerda();
+  abaixarPernaEsquerda();
 }
 void writeServos(int nServo, int posicao) {
 #define SERVOMIN  71  // VALOR PARA UM PULSO MAIOR QUE 1 mS
